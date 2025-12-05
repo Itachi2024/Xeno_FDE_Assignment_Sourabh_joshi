@@ -13,11 +13,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Allowed origins - update these as needed
-const allowedOrigins = [
-  'https://xeno-trial-3.vercel.app', // production frontend
-  'http://localhost:3000',           // local dev
-];
+// // Allowed origins - update these as needed
+// const allowedOrigins = [
+//   'https://xeno-trial-3.vercel.app', // production frontend
+//   'http://localhost:3000',           // local dev
+// ];
 
 // CORS options
 const corsOptions = {
@@ -37,6 +37,35 @@ app.use(cors(corsOptions));
 
 // Ensure preflight requests are handled
 app.options('*', cors(corsOptions));
+//temporary
+// TEMPORARY DEBUG CORS — add this at the top (above app.use(express.json()))
+app.use((req, res, next) => {
+  const origin = req.get('Origin');
+  console.log('[CORS-DEBUG] origin=', origin);
+  next();
+});
+
+const allowedOrigins = [
+  'https://xeno-trial-3.vercel.app',
+  'http://localhost:3000',
+];
+
+// Echo origin when allowed
+app.use((req, res, next) => {
+  const origin = req.get('Origin');
+  if (!origin) {
+    // server-to-server or curl
+    return next();
+  }
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+  }
+  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  next();
+});
 
 // Built-in body parser
 app.use(express.json());
