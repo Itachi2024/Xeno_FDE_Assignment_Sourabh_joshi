@@ -7,8 +7,18 @@ import tenantRoutes from './routes/tenant.js';
 import shopifyRoutes from './routes/shopify.js';
 import insightsRoutes from './routes/insights.js';
 import { startSyncScheduler } from './services/scheduler.js';
+import debugRoutes from "./routes/debug.js";
+
 
 dotenv.config();
+console.log("[ENV-DEBUG] DATABASE_URL present?", !!process.env.DATABASE_URL);
+console.log(
+  "[ENV-DEBUG] DATABASE_URL preview:",
+  (process.env.DATABASE_URL || "")
+    .slice(0, 80)
+    .replace(/:[^:]+@/, "/:*****@")
+);
+
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -51,6 +61,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/tenants', tenantRoutes);
 app.use('/api/shopify', shopifyRoutes);
 app.use('/api/insights', insightsRoutes);
+app.use("/debug", debugRoutes);
+
 
 // Health endpoint
 app.get('/health', (req, res) => {
