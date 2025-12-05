@@ -9,7 +9,9 @@
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "db:seed": "node prisma/seed.js"
+    "db:seed": "node prisma/seed.js",
+     "build": "npx prisma generate && yarn build"
+  
   },
   "prisma": {
     "seed": "node prisma/seed.js"

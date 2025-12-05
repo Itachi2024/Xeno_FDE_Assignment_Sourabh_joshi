@@ -28,7 +28,7 @@ export default function DashboardPage() {
   const fetchTenants = async () => {
     try {
       const token = localStorage.getItem('token');
-      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/tenants`, {
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/tenants`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTenants(data);
@@ -42,7 +42,7 @@ export default function DashboardPage() {
     e.preventDefault();
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/tenants`, newTenant, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/tenants`, newTenant, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setShowAddTenant(false);
@@ -57,7 +57,7 @@ export default function DashboardPage() {
     if (!selectedTenant) return;
     try {
       const token = localStorage.getItem('token');
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/shopify/sync/${selectedTenant.id}`, {}, {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/shopify/sync/${selectedTenant.id}`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert('Sync completed successfully!');

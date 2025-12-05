@@ -35,10 +35,10 @@ export default function Dashboard({ tenant }) {
       const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
       const [overviewRes, customersRes, ordersRes, advancedRes] = await Promise.all([
-        axios.get(`${baseUrl}/insights/${tenant.id}/overview`, config),
-        axios.get(`${baseUrl}/insights/${tenant.id}/top-customers`, config),
-        axios.get(`${baseUrl}/insights/${tenant.id}/orders-by-date?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`, config),
-        axios.get(`${baseUrl}/insights/${tenant.id}/advanced`, config)
+        axios.get(`${baseUrl}/api/insights/${tenant.id}/overview`, config),
+        axios.get(`${baseUrl}/api/insights/${tenant.id}/top-customers`, config),
+        axios.get(`${baseUrl}/api/insights/${tenant.id}/orders-by-date?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`, config),
+        axios.get(`${baseUrl}/api/insights/${tenant.id}/advanced`, config)
       ]);
 
       setOverview(overviewRes.data);

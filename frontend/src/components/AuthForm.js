@@ -20,7 +20,7 @@ export default function AuthForm({ isLogin }) {
     setLoading(true);
 
     try {
-      const endpoint = isLogin ? '/auth/login' : '/auth/register';
+      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
       const { data } = await axios.post(
         `${process.env.NEXT_PUBLIC_API_URL}${endpoint}`,
         formData
