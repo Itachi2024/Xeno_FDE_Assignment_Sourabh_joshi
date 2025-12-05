@@ -13,69 +13,46 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// // Allowed origins - update these as needed
-// const allowedOrigins = [
-//   'https://xeno-trial-3.vercel.app', // production frontend
-//   'http://localhost:3000',           // local dev
-// ];
+// Allowed origins - update these as needed
+const allowedOrigins = [
+  'https://xeno-trial-3.vercel.app', // production frontend
+  'http://localhost:3000',           // local dev
+];
 
-// CORS options
+// Prevent edge caching of CORS responses (helps avoid stale preflight responses)
+app.use((req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+  res.setHeader('Surrogate-Control', 'no-store');
+  next();
+});
+
+// CORS options — echo the exact origin when allowed (required when credentials: true)
 const corsOptions = {
-  origin: function (origin, callback) {
-    // allow requests with no origin (e.g., mobile apps, curl, server-to-server)
+  origin: (origin, callback) => {
+    // Allow requests with no origin (e.g., server-to-server or curl)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) return callback(null, true);
-    return callback(new Error('CORS policy: Origin not allowed'), false);
+    if (allowedOrigins.includes(origin)) return callback(null, origin);
+    return callback(new Error('Not allowed by CORS'), false);
   },
-  credentials: true, // set to true if you use cookies / authentication that requires credentials
+  credentials: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
 };
 
-// Apply CORS middleware BEFORE your routes
+// Apply CORS middleware BEFORE body parser and routes
 app.use(cors(corsOptions));
-
-// Ensure preflight requests are handled
-app.options('*', cors(corsOptions));
-//temporary
-// TEMPORARY DEBUG CORS — add this at the top (above app.use(express.json()))
-app.use((req, res, next) => {
-  const origin = req.get('Origin');
-  console.log('[CORS-DEBUG] origin=', origin);
-  next();
-});
-
-const allowedOrigins = [
-  'https://xeno-trial-3.vercel.app',
-  'http://localhost:3000',
-];
-
-// Echo origin when allowed
-app.use((req, res, next) => {
-  const origin = req.get('Origin');
-  if (!origin) {
-    // server-to-server or curl
-    return next();
-  }
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  }
-  if (req.method === 'OPTIONS') return res.sendStatus(204);
-  next();
-});
+app.options('*', cors(corsOptions)); // handle preflight
 
 // Built-in body parser
 app.use(express.json());
 
-// Routes (after CORS and body parser)
+// Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tenants', tenantRoutes);
 app.use('/api/shopify', shopifyRoutes);
 app.use('/api/insights', insightsRoutes);
 
+// Health endpoint
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
