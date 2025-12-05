@@ -1055,6 +1055,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Recharts for beautiful visualizations
 
 ---
+## 👤 Author & Maintainer
+
+Name: Sourabh Joshi
+
+GitHub: https://github.com/Itachi2024
+
+Email: sourabhjoshi2310@gmail.com
 
 ## 📞 Support
 
