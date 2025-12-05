@@ -1,0 +1,117 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenants   Tenant[]
+}
+
+model Tenant {
+  id                String    @id @default(uuid())
+  name              String
+  shopifyDomain     String    @unique
+  shopifyAccessToken String?
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  customers         Customer[]
+  orders            Order[]
+  products          Product[]
+  events            Event[]
+}
+
+model Customer {
+  id              String   @id @default(uuid())
+  shopifyId       String
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  email           String?
+  firstName       String?
+  lastName        String?
+  ordersCount     Int      @default(0)
+  totalSpent      Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  orders          Order[]
+
+  @@unique([shopifyId, tenantId])
+  @@index([tenantId])
+}
+
+model Order {
+  id              String   @id @default(uuid())
+  shopifyId       String
+  tenantId        String
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customerId      String?
+  customer        Customer? @relation(fields: [customerId], references: [id])
+  orderNumber     String
+  totalPrice      Float
+  currency        String   @default("USD")
+  financialStatus String?
+  fulfillmentStatus String?
+  orderDate       DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  items           OrderItem[]
+
+  @@unique([shopifyId, tenantId])
+  @@index([tenantId])
+  @@index([orderDate])
+}
+
+model OrderItem {
+  id          String  @id @default(uuid())
+  orderId     String
+  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id])
+  title       String
+  quantity    Int
+  price       Float
+  createdAt   DateTime @default(now())
+
+  @@index([orderId])
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  shopifyId   String
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  title       String
+  vendor      String?
+  productType String?
+  price       Float?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orderItems  OrderItem[]
+
+  @@unique([shopifyId, tenantId])
+  @@index([tenantId])
+}
+
+model Event {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  eventType   String
+  customerId  String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId])
+  @@index([eventType])
+}
