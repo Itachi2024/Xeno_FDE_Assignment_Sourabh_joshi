@@ -1,3 +1,4 @@
+// src/index.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -12,15 +13,35 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'https://your-app.vercel.app'
-  ]
-}));
+// Allowed origins - update these as needed
+const allowedOrigins = [
+  'https://xeno-trial-3.vercel.app', // production frontend
+  'http://localhost:3000',           // local dev
+];
+
+// CORS options
+const corsOptions = {
+  origin: function (origin, callback) {
+    // allow requests with no origin (e.g., mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('CORS policy: Origin not allowed'), false);
+  },
+  credentials: true, // set to true if you use cookies / authentication that requires credentials
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+};
+
+// Apply CORS middleware BEFORE your routes
+app.use(cors(corsOptions));
+
+// Ensure preflight requests are handled
+app.options('*', cors(corsOptions));
+
+// Built-in body parser
 app.use(express.json());
 
-// Routes
+// Routes (after CORS and body parser)
 app.use('/api/auth', authRoutes);
 app.use('/api/tenants', tenantRoutes);
 app.use('/api/shopify', shopifyRoutes);
